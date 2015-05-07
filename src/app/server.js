@@ -92,6 +92,10 @@ app.get('/app', function(req, res) {
   });
 });
 
+app.get('/hackweek', function(req, res) {
+  res.render('summary');
+});
+
 app.listen(config.port, function() {
   console.log('CommitStream Web Server listening on port ' + config.port);
 });

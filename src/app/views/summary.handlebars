@@ -1,0 +1,104 @@
+<html>
+<head>
+<style type="text/css">
+.spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-left: -128px; /* half width of the spinner gif */
+    margin-top: -128px; /* half height of the spinner gif */
+    text-align:center;
+    z-index:1234;
+    overflow: auto;
+    width: 256px; /* width of the spinner gif */
+    height: 258px; /*hight of the spinner gif +2px to fix IE8 issue */
+}
+.item {
+    background-color: rgba(255, 255, 255, 0.2);
+    cursor: context-menu;
+    font-size: 0.7em;
+    margin-bottom: 5px;
+    margin-left: 3px;
+    transition: all 0.3s ease-out 0s;
+}
+.summary-value {
+    line-height: 1em;
+    min-height: 50px;
+    min-width: 50px;
+    padding: 10px;
+    position: relative;
+    text-align: left;
+    vertical-align: bottom;
+    word-spacing: -1px;
+}
+.effect-layer {
+    bottom: 0;
+    left: 0;
+    opacity: 0.9;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: -1;
+}
+.value-label-pair .label {
+    font-size: 0.8em;
+    font-weight: 700;
+    line-height: 1em;
+    max-width: 75px;
+    padding: 3px 1em 0 6px;
+    text-transform: uppercase;
+}
+.value-label-pair {
+    transition: all 0.3s ease 0s;
+}
+.value-label-pair > * {
+    display: table-cell;
+    vertical-align: top;
+}
+</style>
+</head>
+<body>
+<div id="spinner" class="spinner">
+    <img id="img-spinner" src="spinner.gif" alt="Loading"/>
+</div>
+<div id="summary"></div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/3.3.0/masonry.pkgd.js"></script>
+<script src="commit.stats.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $("#spinner").hide();
+    $("#spinner").bind("ajaxSend", function() {
+        $(this).show();
+    }).bind("ajaxStop", function() {
+        $(this).hide();
+    }).bind("ajaxError", function() {
+        $(this).hide();
+    });
+
+    var instance = "580c2f2e-48b7-4db3-b6ba-9a04653df6a9";
+    var partition = "digestCommits-18bcc42b-2436-4071-803f-f19b8cd9e8b2";
+    var apiKey = "1e2d53a6-919b-449b-87ad-518b2320861d"
+
+    var stats = Stats(instance);
+    var render = Render();
+
+    $.when(stats.statsPerDigest(partition, apiKey))
+        .then(function(response) {
+            return render.usersActivity($("#summary"), response);
+        })
+        .then(function(masonryContainers) {
+            for (var i = 0; i < masonryContainers.length; i++) {
+                var summary = $("#"+masonryContainers[i]);
+
+                summary.masonry({
+                    columnWidth: 1,
+                    itemSelector: '.item'
+                });
+            };
+        });
+});
+</script>
+</body>
+</html>
