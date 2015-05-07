@@ -33,7 +33,7 @@
           html_url: aCommit.url,
           repository: repository,
           branch: branch,
-          originalMessage: pushEvent,
+          originalMessage: aCommit,
           pushDate: new Date().toJSON()
         };
         return {
