@@ -21,6 +21,14 @@
       .then(statusCodeValidator.validateGetProjection(args.name, args.id));
   };
 
+ client.queryStateById = function(args) {
+    var stateArgs = {
+      name: args.name
+    };
+
+    return client.projection.getStateAsync(stateArgs)
+      .then(statusCodeValidator.validateGetProjection(args.name, args.name));
+  };
   client.postToStream = function(args) {
     // Stay immutable, bro
     var events = args.events;
@@ -40,7 +48,7 @@
 
   client.getFromStream = function(args) {
     var getArgs = _.pick(args, 'name', 'count', 'pageUrl', 'embed');
-    
+
     return client.streams.getAsync(getArgs)
       .then(statusCodeValidator.validateGetStream(args.name));
   };

@@ -20,6 +20,7 @@
     margin-bottom: 5px;
     margin-left: 3px;
     transition: all 0.3s ease-out 0s;
+    width: 15%;
 }
 .summary-value {
     line-height: 1em;
@@ -62,6 +63,7 @@
     <img id="img-spinner" src="spinner.gif" alt="Loading"/>
 </div>
 <div id="summary"></div>
+<div id="details"></div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/3.3.0/masonry.pkgd.js"></script>
@@ -69,12 +71,13 @@
 <script type="text/javascript">
 $(document).ready(function() {
     $("#spinner").hide();
-    $("#spinner").bind("ajaxSend", function() {
-        $(this).show();
-    }).bind("ajaxStop", function() {
-        $(this).hide();
-    }).bind("ajaxError", function() {
-        $(this).hide();
+    $("#spinner").bind({
+        ajaxStart: function() {
+            $(this).show();
+        },
+        ajaxStop: function() {
+            $(this).hide();
+        }
     });
 
     var instance = "580c2f2e-48b7-4db3-b6ba-9a04653df6a9";
@@ -83,21 +86,37 @@ $(document).ready(function() {
 
     var stats = Stats(instance);
     var render = Render();
+    var dynElements = {};
 
+    var clickfy = function(createdElements) {
+        for (var key in createdElements) {
+            dynElements[key] = createdElements[key];
+            $("#" + key).click(function() {
+                $("#" + dynElements[$(this).attr('id')]).toggle("slow");
+            });
+        };
+    };
+    var masonryfy = function() {
+        $("#summary").masonry({
+            itemSelector: '.item'
+        });
+        for (var key in dynElements) {
+            $("#" + dynElements[key]).masonry({
+                itemSelector: '.item'
+            });
+        };
+    };
     $.when(stats.statsPerDigest(partition, apiKey))
         .then(function(response) {
-            return render.usersActivity($("#summary"), response);
+            return render.digestCommitsStats(response,$("#summary"),$("#details"));
         })
-        .then(function(masonryContainers) {
-            for (var i = 0; i < masonryContainers.length; i++) {
-                var summary = $("#"+masonryContainers[i]);
-
-                summary.masonry({
-                    columnWidth: 1,
-                    itemSelector: '.item'
-                });
-            };
-        });
+        .then(clickfy)
+        .then(function(){ return stats.mergeConflictAlerts(null, apiKey)})
+        .then(function(response) {
+            return render.mergeConflictAlerts(response,$("#summary"),$("#details"));
+        })
+        .then(clickfy)
+        .done(function(response) {masonryfy(response)});
 });
 </script>
 </body>
