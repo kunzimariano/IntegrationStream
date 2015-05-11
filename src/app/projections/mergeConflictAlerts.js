@@ -4,20 +4,23 @@ var addFilesModified = function(pushDate, files, branch, state) {
       if (state[pushDate][file]) {
         if (!state[pushDate][file].hasOwnProperty(branch)) {
           state[pushDate][file][branch] = 1;
-          emit("mergeConflictAlert", "conflictDetected", {
+          emit("mergeConflictAlert1", "conflictDetected", {
             'file': file,
-            'branches': state[pushDate][file]
+            'branches': state[pushDate][file],
+            'date':pushDate
           })
         } else {
           if (Object.keys(state[pushDate][file]).length > 1) {
-          	state[pushDate][file][branch]++;
-            emit("mergeConflictAlert", "conflictknown", {
+            state[pushDate][file][branch]++;
+            emit("mergeConflictAlert1", "conflictknown", {
               'file': file,
-              'branches': state[pushDate][file]
+              'branches': state[pushDate][file],
+              'date':pushDate
             });
           }
         }
       } else {
+        state[pushDate][file] = {};
         state[pushDate][file][branch] = 1;
       }
     });
